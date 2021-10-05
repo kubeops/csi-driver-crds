@@ -1,0 +1,24 @@
+# permissions for end users to edit caproviderclasses.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: caproviderclass-editor-role
+rules:
+- apiGroups:
+  - cacerts.csi.appscode.com
+  resources:
+  - caproviderclasses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cacerts.csi.appscode.com
+  resources:
+  - caproviderclasses/status
+  verbs:
+  - get

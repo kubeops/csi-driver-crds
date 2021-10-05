@@ -1,0 +1,17 @@
+domain: csi.appscode.com
+layout:
+- go.kubebuilder.io/v3
+multigroup: true
+projectName: csi-driver-ca-certificates-crds
+repo: kubeops.dev/csi-driver-ca-certificates-crds
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: csi.appscode.com
+  group: cacerts
+  kind: CAProviderClass
+  path: kubeops.dev/csi-driver-ca-certificates-crds/apis/cacerts/v1alpha1
+  version: v1alpha1
+version: "3"

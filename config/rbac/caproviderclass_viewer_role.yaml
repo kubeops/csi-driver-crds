@@ -1,0 +1,20 @@
+# permissions for end users to view caproviderclasses.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: caproviderclass-viewer-role
+rules:
+- apiGroups:
+  - cacerts.csi.appscode.com
+  resources:
+  - caproviderclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cacerts.csi.appscode.com
+  resources:
+  - caproviderclasses/status
+  verbs:
+  - get

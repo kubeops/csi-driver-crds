@@ -1,0 +1,7 @@
+apiVersion: cacerts.csi.appscode.com/v1alpha1
+kind: CAProviderClass
+metadata:
+  name: caproviderclass-sample
+spec:
+  # Add fields here
+  foo: bar
