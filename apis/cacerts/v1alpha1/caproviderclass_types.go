@@ -20,16 +20,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // CAProviderClassSpec defines the desired state of CAProviderClass
 type CAProviderClassSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of CAProviderClass. Edit caproviderclass_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Selects a key of secrets
+	// +optional
+	SecretRefs []SecretKeySelector `json:"secretRef,omitempty"`
+	// Selects issuers or cluster issuers
+	// +optional
+	IssuersRefs []ObjectReference `json:"issuerRef,omitempty"`
 }
 
 // CAProviderClassStatus defines the observed state of CAProviderClass
@@ -61,4 +59,39 @@ type CAProviderClassList struct {
 
 func init() {
 	SchemeBuilder.Register(&CAProviderClass{}, &CAProviderClassList{})
+}
+
+// SecretKeySelector selects a key of a Secret.
+// +structType=atomic
+type SecretKeySelector struct {
+	// Namespace of the referent.
+	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
+	// Name of the referent.
+	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+	Name string `json:"name,omitempty"`
+	// The key of the secret to select from.  Must be a valid secret key.
+	Key string `json:"key"`
+	// Specify whether the Secret or its key must be defined
+	// +optional
+	Optional *bool `json:"optional,omitempty"`
+}
+
+// ObjectReference contains enough information to let you locate the  typed referenced object.
+// +structType=atomic
+type ObjectReference struct {
+	// APIGroup is the group for the resource being referenced.
+	// If APIGroup is not specified, the specified Kind must be in the core API group.
+	// For any other third-party types, APIGroup is required.
+	// +optional
+	APIGroup *string `json:"apiGroup"`
+	// Kind is the type of resource being referenced
+	Kind string `json:"kind"`
+	// Namespace of the referent.
+	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
+	// Name is the name of resource being referenced
+	Name string `json:"name"`
 }
