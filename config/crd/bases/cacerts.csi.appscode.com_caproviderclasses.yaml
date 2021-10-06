@@ -36,11 +36,25 @@ spec:
           spec:
             description: CAProviderClassSpec defines the desired state of CAProviderClass
             properties:
-              issuerRef:
-                description: Selects issuers or cluster issuers
+              certificateRefs:
+                description: Selects certificates
                 items:
                   description: ObjectReference contains enough information to let
-                    you locate the  typed referenced object.
+                    you locate the referenced objects of a known type.
+                  properties:
+                    name:
+                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                      type: string
+                    namespace:
+                      description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                      type: string
+                  type: object
+                type: array
+              issuerRefs:
+                description: Selects issuers or cluster issuers
+                items:
+                  description: TypedObjectReference contains enough information to
+                    let you locate the typed referenced object.
                   properties:
                     apiGroup:
                       description: APIGroup is the group for the resource being referenced.
@@ -62,7 +76,7 @@ spec:
                   - name
                   type: object
                 type: array
-              secretRef:
+              secretRefs:
                 description: Selects a key of secrets
                 items:
                   description: SecretKeySelector selects a key of a Secret.

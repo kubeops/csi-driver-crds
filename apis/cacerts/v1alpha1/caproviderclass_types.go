@@ -24,10 +24,13 @@ import (
 type CAProviderClassSpec struct {
 	// Selects a key of secrets
 	// +optional
-	SecretRefs []SecretKeySelector `json:"secretRef,omitempty"`
+	SecretRefs []SecretKeySelector `json:"secretRefs,omitempty"`
 	// Selects issuers or cluster issuers
 	// +optional
-	IssuersRefs []ObjectReference `json:"issuerRef,omitempty"`
+	IssuerRefs []TypedObjectReference `json:"issuerRefs,omitempty"`
+	// Selects certificates
+	// +optional
+	CertificateRefs []ObjectReference `json:"certificateRefs,omitempty"`
 }
 
 // CAProviderClassStatus defines the observed state of CAProviderClass
@@ -78,9 +81,9 @@ type SecretKeySelector struct {
 	Optional *bool `json:"optional,omitempty"`
 }
 
-// ObjectReference contains enough information to let you locate the  typed referenced object.
+// TypedObjectReference contains enough information to let you locate the typed referenced object.
 // +structType=atomic
-type ObjectReference struct {
+type TypedObjectReference struct {
 	// APIGroup is the group for the resource being referenced.
 	// If APIGroup is not specified, the specified Kind must be in the core API group.
 	// For any other third-party types, APIGroup is required.
@@ -94,4 +97,16 @@ type ObjectReference struct {
 	Namespace string `json:"namespace,omitempty"`
 	// Name is the name of resource being referenced
 	Name string `json:"name"`
+}
+
+// ObjectReference contains enough information to let you locate the referenced objects of a known type.
+// +structType=atomic
+type ObjectReference struct {
+	// Namespace of the referent.
+	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
+	// Name of the referent.
+	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+	Name string `json:"name,omitempty"`
 }
