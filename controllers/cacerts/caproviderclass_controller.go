@@ -18,8 +18,8 @@ package cacerts
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/jetstack/cert-manager/pkg/apis/certmanager"
 	certmanagerv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -62,111 +62,49 @@ func (r *CAProviderClassReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CAProviderClassReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	secretHandler := handler.EnqueueRequestsFromMapFunc(func(a client.Object) []reconcile.Request {
-		providers := &cacertsv1alpha1.CAProviderClassList{}
-		if err := r.List(context.Background(), providers); err != nil {
-			return nil
-		}
-		var req []reconcile.Request
+	mf := func(gk schema.GroupKind) handler.MapFunc {
+		return func(a client.Object) []reconcile.Request {
+			providers := &cacertsv1alpha1.CAProviderClassList{}
+			if err := r.List(context.Background(), providers); err != nil {
+				return nil
+			}
+			var req []reconcile.Request
 
-		var ns, name string
-		for _, p := range providers.Items {
-			for _, ref := range p.Spec.SecretRefs {
-				ns = ref.Namespace
-				if ns == "" {
-					ns = p.Namespace
-				}
-				name = ref.Name
+			var ns string
+			for _, p := range providers.Items {
+				for _, ref := range p.Spec.Refs {
+					var group string
+					if ref.APIGroup != nil {
+						group = *ref.APIGroup
+					}
+					if group != gk.Group ||
+						ref.Kind != gk.Kind  ||
+						a.GetName() != ref.Name {
+						continue
+					}
 
-				if ns == a.GetNamespace() && name == a.GetName() {
+					ns = ref.Namespace
+					if ns == "" {
+						ns = p.Namespace
+					}
+
+					if a.GetNamespace() != "" && a.GetNamespace() != ns {
+						continue
+					}
+
 					req = append(req, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(&p)})
 					break
 				}
 			}
+			return req
 		}
-		return req
-	})
-
-	certHandler := handler.EnqueueRequestsFromMapFunc(func(a client.Object) []reconcile.Request {
-		providers := &cacertsv1alpha1.CAProviderClassList{}
-		if err := r.List(context.Background(), providers); err != nil {
-			return nil
-		}
-		var req []reconcile.Request
-
-		var ns, name string
-		for _, p := range providers.Items {
-			for _, ref := range p.Spec.CertificateRefs {
-				ns = ref.Namespace
-				if ns == "" {
-					ns = p.Namespace
-				}
-				name = ref.Name
-
-				if ns == a.GetNamespace() && name == a.GetName() {
-					req = append(req, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(&p)})
-					break
-				}
-			}
-		}
-		return req
-	})
-
-	issuerHandler := handler.EnqueueRequestsFromMapFunc(func(a client.Object) []reconcile.Request {
-		providers := &cacertsv1alpha1.CAProviderClassList{}
-		if err := r.List(context.Background(), providers); err != nil {
-			return nil
-		}
-		var req []reconcile.Request
-
-		var ns, name string
-		for _, p := range providers.Items {
-			for _, ref := range p.Spec.IssuerRefs {
-				if ref.APIGroup == nil || *ref.APIGroup != certmanager.GroupName || ref.Kind != "Issuer" {
-					continue
-				}
-				ns = ref.Namespace
-				if ns == "" {
-					ns = p.Namespace
-				}
-				name = ref.Name
-
-				if ns == a.GetNamespace() && name == a.GetName() {
-					req = append(req, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(&p)})
-					break
-				}
-			}
-		}
-		return req
-	})
-
-	clusterIssuerHandler := handler.EnqueueRequestsFromMapFunc(func(a client.Object) []reconcile.Request {
-		providers := &cacertsv1alpha1.CAProviderClassList{}
-		if err := r.List(context.Background(), providers); err != nil {
-			return nil
-		}
-		var req []reconcile.Request
-
-		for _, p := range providers.Items {
-			for _, ref := range p.Spec.IssuerRefs {
-				if ref.APIGroup == nil || *ref.APIGroup != certmanager.GroupName || ref.Kind != "ClusterIssuer" {
-					continue
-				}
-
-				if ref.Name == a.GetName() {
-					req = append(req, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(&p)})
-					break
-				}
-			}
-		}
-		return req
-	})
+	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cacertsv1alpha1.CAProviderClass{}).
-		Watches(&source.Kind{Type: &core.Secret{}}, secretHandler).
-		Watches(&source.Kind{Type: &certmanagerv1.Certificate{}}, certHandler).
-		Watches(&source.Kind{Type: &certmanagerv1.Issuer{}}, issuerHandler).
-		Watches(&source.Kind{Type: &certmanagerv1.ClusterIssuer{}}, clusterIssuerHandler).
+		Watches(&source.Kind{Type: &core.Secret{}}, handler.EnqueueRequestsFromMapFunc(mf(schema.GroupKind{Group: "", Kind: "Secret"}))).
+		Watches(&source.Kind{Type: &certmanagerv1.Certificate{}}, handler.EnqueueRequestsFromMapFunc(mf(schema.GroupKind{Group: certmanagerv1.SchemeGroupVersion.Group, Kind: "Certificate"}))).
+		Watches(&source.Kind{Type: &certmanagerv1.Issuer{}}, handler.EnqueueRequestsFromMapFunc(mf(schema.GroupKind{Group: certmanagerv1.SchemeGroupVersion.Group, Kind: "Issuer"}))).
+		Watches(&source.Kind{Type: &certmanagerv1.ClusterIssuer{}}, handler.EnqueueRequestsFromMapFunc(mf(schema.GroupKind{Group: certmanagerv1.SchemeGroupVersion.Group, Kind: "ClusterIssuer"}))).
 		Complete(r)
 }
