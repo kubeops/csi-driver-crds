@@ -36,22 +36,9 @@ spec:
           spec:
             description: CAProviderClassSpec defines the desired state of CAProviderClass
             properties:
-              certificateRefs:
-                description: Selects certificates
-                items:
-                  description: ObjectReference contains enough information to let
-                    you locate the referenced objects of a known type.
-                  properties:
-                    name:
-                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                      type: string
-                    namespace:
-                      description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
-                      type: string
-                  type: object
-                type: array
-              issuerRefs:
-                description: Selects issuers or cluster issuers
+              refs:
+                description: Selects secrets, issuers, cluster issuers, certificates
+                  or external issuers
                 items:
                   description: TypedObjectReference contains enough information to
                     let you locate the typed referenced object.
@@ -62,6 +49,10 @@ spec:
                         the core API group. For any other third-party types, APIGroup
                         is required.
                       type: string
+                    key:
+                      description: The key of the secret to select from.  Must be
+                        a valid secret key.
+                      type: string
                     kind:
                       description: Kind is the type of resource being referenced
                       type: string
@@ -71,31 +62,12 @@ spec:
                     namespace:
                       description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
                       type: string
-                  required:
-                  - kind
-                  - name
-                  type: object
-                type: array
-              secretRefs:
-                description: Selects a key of secrets
-                items:
-                  description: SecretKeySelector selects a key of a Secret.
-                  properties:
-                    key:
-                      description: The key of the secret to select from.  Must be
-                        a valid secret key.
-                      type: string
-                    name:
-                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                      type: string
-                    namespace:
-                      description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
-                      type: string
                     optional:
                       description: Specify whether the Secret or its key must be defined
                       type: boolean
                   required:
-                  - key
+                  - kind
+                  - name
                   type: object
                 type: array
             type: object

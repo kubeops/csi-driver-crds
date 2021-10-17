@@ -22,21 +22,13 @@ import (
 
 // CAProviderClassSpec defines the desired state of CAProviderClass
 type CAProviderClassSpec struct {
-	// Selects a key of secrets
+	// Selects secrets, issuers, cluster issuers, certificates or external issuers
 	// +optional
-	SecretRefs []SecretKeySelector `json:"secretRefs,omitempty"`
-	// Selects issuers or cluster issuers
-	// +optional
-	IssuerRefs []TypedObjectReference `json:"issuerRefs,omitempty"`
-	// Selects certificates
-	// +optional
-	CertificateRefs []ObjectReference `json:"certificateRefs,omitempty"`
+	Refs []TypedObjectReference `json:"refs,omitempty"`
 }
 
 // CAProviderClassStatus defines the observed state of CAProviderClass
 type CAProviderClassStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 //+kubebuilder:object:root=true
@@ -64,23 +56,6 @@ func init() {
 	SchemeBuilder.Register(&CAProviderClass{}, &CAProviderClassList{})
 }
 
-// SecretKeySelector selects a key of a Secret.
-// +structType=atomic
-type SecretKeySelector struct {
-	// Namespace of the referent.
-	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
-	// +optional
-	Namespace string `json:"namespace,omitempty"`
-	// Name of the referent.
-	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-	Name string `json:"name,omitempty"`
-	// The key of the secret to select from.  Must be a valid secret key.
-	Key string `json:"key"`
-	// Specify whether the Secret or its key must be defined
-	// +optional
-	Optional *bool `json:"optional,omitempty"`
-}
-
 // TypedObjectReference contains enough information to let you locate the typed referenced object.
 // +structType=atomic
 type TypedObjectReference struct {
@@ -97,16 +72,10 @@ type TypedObjectReference struct {
 	Namespace string `json:"namespace,omitempty"`
 	// Name is the name of resource being referenced
 	Name string `json:"name"`
-}
-
-// ObjectReference contains enough information to let you locate the referenced objects of a known type.
-// +structType=atomic
-type ObjectReference struct {
-	// Namespace of the referent.
-	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+	// The key of the secret to select from.  Must be a valid secret key.
 	// +optional
-	Namespace string `json:"namespace,omitempty"`
-	// Name of the referent.
-	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-	Name string `json:"name,omitempty"`
+	Key string `json:"key,omitempty"`
+	// Specify whether the Secret or its key must be defined
+	// +optional
+	Optional *bool `json:"optional,omitempty"`
 }
