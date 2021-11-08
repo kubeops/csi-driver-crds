@@ -78,7 +78,7 @@ func (r *CAProviderClassReconciler) SetupWithManager(mgr ctrl.Manager) error {
 						group = *ref.APIGroup
 					}
 					if group != gk.Group ||
-						ref.Kind != gk.Kind  ||
+						ref.Kind != gk.Kind ||
 						a.GetName() != ref.Name {
 						continue
 					}
