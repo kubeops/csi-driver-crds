@@ -109,7 +109,7 @@ func (ps *State) Init(name string) error {
 	}
 
 	if ps.Dir == "" {
-		newDir, err := ioutil.TempDir("", "k8s_test_framework_")
+		newDir, err := os.MkdirTemp("", "k8s_test_framework_")
 		if err != nil {
 			return err
 		}

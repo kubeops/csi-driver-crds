@@ -602,7 +602,7 @@ func readCRDs(basePath string, files []os.FileInfo) ([]*unstructured.Unstructure
 
 // readDocuments reads documents from file.
 func readDocuments(fp string) ([][]byte, error) {
-	b, err := ioutil.ReadFile(fp) //nolint:gosec
+	b, err := os.ReadFile(fp) //nolint:gosec
 	if err != nil {
 		return nil, err
 	}
